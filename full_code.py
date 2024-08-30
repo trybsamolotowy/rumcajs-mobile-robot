@@ -5,25 +5,18 @@ from PIL import Image, ImageTk
 import os
 import sys
 import time
-from odrive.enums import (AXIS_STATE_IDLE, AXIS_STATE_CLOSED_LOOP_CONTROL)
 import argparse
-import sys
-import time
 import odrive
 from odrive.enums import (AXIS_STATE_CLOSED_LOOP_CONTROL,
                           AXIS_STATE_ENCODER_HALL_POLARITY_CALIBRATION,
                           AXIS_STATE_ENCODER_OFFSET_CALIBRATION,
                           AXIS_STATE_IDLE, AXIS_STATE_MOTOR_CALIBRATION,
-                          CONTROL_MODE_POSITION_CONTROL, ENCODER_MODE_HALL)
+                          CONTROL_MODE_POSITION_CONTROL, ENCODER_MODE_HALL,
+                          AXIS_STATE_IDLE, AXIS_STATE_CLOSED_LOOP_CONTROL)
 
 
 class HBMotorConfig:
-    """Class for configuring an Odrive axis for a Hoverboard motor.
 
-    Only works with one Odrive at a time.
-    """
-
-    # Hoverboard Kv
     HOVERBOARD_KV = 16.0
 
     # Min/Max phase inductance of motor
@@ -161,9 +154,9 @@ class HBMotorConfig:
 
         self._find_odrive() 
 
-        # input("Make sure the motor is free to move, then press enter...")
+        # input("Make sure the motor is free to move, then press enter...") !!!!!!!!!!!!!!!!!! be careful while running code 
 
-        print("Calibrating Odrive for hoverboard motor (you should hear a " "beep)...")
+        print("Calibrating Odrive (you should hear a " "beep)...")
 
         self.odrv_axis.requested_state = AXIS_STATE_MOTOR_CALIBRATION
 
@@ -388,14 +381,12 @@ root = tk.Tk()
 root.title("Rumcajs")
 root.configure(bg="#ffffff")
 
-# Ustawienia pełnoekranowe
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 root.geometry(f"{screen_width}x{screen_height}")
 
 cap = cv2.VideoCapture(2)  # ZED
 
-# Ustawienia folderów
 photos_dir = "photos_captured"
 left_folder_photos = os.path.join(photos_dir, "L")
 right_folder_photos = os.path.join(photos_dir, "R")
@@ -415,7 +406,6 @@ create_folder_if_not_exists(films_dir)
 create_folder_if_not_exists(left_folder_films)
 create_folder_if_not_exists(right_folder_films)
 
-# Funkcje do zarządzania plikami
 def get_next_filename(folder, prefix, extension):
     files = [f for f in os.listdir(folder) if f.endswith(extension)]
     if files:
@@ -424,7 +414,7 @@ def get_next_filename(folder, prefix, extension):
     else:
         return f"1_{prefix}.{extension}"
 
-# Klasa zarządzająca kalibracją i sterowaniem silnikiem
+# Calibration and motor control
 class MotorController:
     def __init__(self, axis_num=0, anticogging_cal=False, erase_config=False):
         self.hb_motor_config = HBMotorConfig(axis_num, anticogging_cal, erase_config)
@@ -444,15 +434,14 @@ class MotorController:
 
 motor_controller = MotorController()
 
-# Funkcje do sterowania robotem i zapisywania plików
 def turn_right():
     pass
 
 def turn_left():
     pass
 
-move_task = None  # Global variable to track the movement task
-current_position = 0  # Global variable to track the current motor position
+move_task = None  
+current_position = 0  
 
 def go_straight():
     motor_controller.start_motor()
@@ -461,7 +450,7 @@ def go_straight():
         global current_position
         global move_task
         current_position += 30  # Increase position for continuous movement
-        motor_controller.move_motor(current_position)  # Update motor position
+        motor_controller.move_motor(current_position)  
         move_task = root.after(10, continuous_move)  # Repeat every 10 ms
 
     continuous_move()
@@ -479,8 +468,8 @@ def go_back():
     def continuous_move():
         global current_position
         global move_task
-        current_position -= 30  # Increase position for continuous movement
-        motor_controller.move_motor(current_position)  # Update motor position
+        current_position -= 30  # Decrease position for continuous movement
+        motor_controller.move_motor(current_position) 
         move_task = root.after(10, continuous_move)  # Repeat every 10 ms
 
     continuous_move()
@@ -494,7 +483,6 @@ def save_image():
         left_frame = frame[:, :mid]
         right_frame = frame[:, mid:]
         
-        # Zapis obrazów z podzielonego kadru
         filename_left = get_next_filename(left_folder_photos, "L", "jpg")
         filename_right = get_next_filename(right_folder_photos, "R", "jpg")
         cv2.imwrite(os.path.join(left_folder_photos, filename_left), left_frame)
@@ -508,7 +496,6 @@ def start_filming():
         height, width = frame.shape[:2]
         mid = width // 2
 
-        # Przygotowanie do nagrywania
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         filename_left = get_next_filename(os.path.join(films_dir, "L"), "L", "avi")
         filename_right = get_next_filename(os.path.join(films_dir, "R"), "R", "avi")
@@ -572,7 +559,6 @@ btn_up.bind("<ButtonRelease>", stop_motor)
 btn_down.bind("<ButtonPress-1>", lambda event: go_back())
 btn_down.bind("<ButtonRelease>", stop_motor)
 
-# Funkcja zmieniająca rozmiar komponentów w zależności od rozmiaru okna
 def resize_components(event):
     global scale_factor
     new_width = root.winfo_width()
@@ -590,7 +576,7 @@ def resize_components(event):
 
 root.bind('<Configure>', resize_components)
 
-# Funkcja do aktualizacji obrazu z kamer
+# Camera updates
 def update_frames():
     global filming
     ret, frame = cap.read()
@@ -598,41 +584,39 @@ def update_frames():
         height, width = frame.shape[:2]
         mid = width // 2
 
-        # Podział obrazu na lewą i prawą część
+        # ROI
         left_frame = frame[:, :mid]
         right_frame = frame[:, mid:]
         
-        # Aktualizacja lewego obrazu
+        
         img_left = Image.fromarray(cv2.cvtColor(left_frame, cv2.COLOR_BGR2RGB))
         imgtk_left = ImageTk.PhotoImage(image=img_left)
         left_camera_label.imgtk = imgtk_left
         left_camera_label.configure(image=imgtk_left)
 
-        # Aktualizacja prawego obrazu
+        
         img_right = Image.fromarray(cv2.cvtColor(right_frame, cv2.COLOR_BGR2RGB))
         imgtk_right = ImageTk.PhotoImage(image=img_right)
         right_camera_label.imgtk = imgtk_right
         right_camera_label.configure(image=imgtk_right)
 
-        # Zapis do plików wideo
+        
         if filming:
             out_left.write(left_frame)
             out_right.write(right_frame)
 
-    # Aktualizacja po 10 ms
+    
     root.after(10, update_frames)
 
-# Zmienna do kontrolowania stanu nagrywania
+
 filming = False
 
-# Inicjalne ustawienie rozmiaru komponentów
 resize_components(None)
 
-# Rozpoczęcie aktualizacji obrazu z kamer
 update_frames()
 
 root.mainloop()
 
-# Zwolnienie zasobów kamery po zamknięciu aplikacji
 cap.release()
+
 cv2.destroyAllWindows()
