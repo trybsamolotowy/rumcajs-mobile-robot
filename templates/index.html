@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motor Control Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #video-feed {
+            width: 640px;
+            height: 480px;
+            border: 2px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Motor Control Interface</h1>
+
+    <div id="video-container">
+        <h2>Camera Feed</h2>
+        <img id="video-feed" src="{{ url_for('video_feed') }}" alt="Video Feed">
+    </div>
+
+    <div id="controls">
+        <button id="forward_button">Forward</button>
+        <button id="backward_button">Backward</button>
+        <button id="stop_button">Stop</button>
+        <button id="left_button">Turn Left</button>
+        <button id="right_button">Turn Right</button>
+        <button id="calibrate_button">Calibrate Motor</button>
+        <button id="photo_button">Save Photo</button>
+        <button id="start_filming_button">Start Filming</button>
+        <button id="stop_filming_button">Stop Filming</button>
+    </div>
+
+    <script>
+        document.getElementById('forward_button').addEventListener('mousedown', function() {
+            fetch('/move', {
+                method: 'POST',
+                body: new URLSearchParams('action=start_forward')
+            });
+        });
+
+        document.getElementById('forward_button').addEventListener('mouseup', function() {
+            fetch('/move', {
+                method: 'POST',
+                body: new URLSearchParams('action=stop')
+            });
+        });
+
+        document.getElementById('backward_button').addEventListener('mousedown', function() {
+            fetch('/move', {
+                method: 'POST',
+                body: new URLSearchParams('action=start_backward')
+            });
+        });
+
+        document.getElementById('backward_button').addEventListener('mouseup', function() {
+            fetch('/move', {
+                method: 'POST',
+                body: new URLSearchParams('action=stop')
+            });
+        });
+
+        document.getElementById('left_button').addEventListener('click', function() {
+            fetch('/turn_left', { method: 'GET' });
+        });
+
+        document.getElementById('right_button').addEventListener('click', function() {
+            fetch('/turn_right', { method: 'GET' });
+        });
+
+        document.getElementById('calibrate_button').addEventListener('click', function() {
+            fetch('/calibrate_motor', { method: 'GET' });
+        });
+
+        document.getElementById('photo_button').addEventListener('click', function() {
+            fetch('/save_image', { method: 'GET' });
+        });
+
+        document.getElementById('start_filming_button').addEventListener('click', function() {
+            fetch('/start_filming', { method: 'GET' });
+        });
+
+        document.getElementById('stop_filming_button').addEventListener('click', function() {
+            fetch('/stop_filming', { method: 'GET' });
+        });
+    </script>
+</body>
+</html>
