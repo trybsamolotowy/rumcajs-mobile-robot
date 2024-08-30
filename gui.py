@@ -9,7 +9,7 @@ root.title("Sterowanie Rumcajsem")
 root.geometry("1400x900")
 root.configure(bg="#ffffff")
 
-cap = cv2.VideoCapture(2)  # Jedna kamera
+cap = cv2.VideoCapture(2)  # ZED
 
 # Ustawienia folderów
 photos_dir = "photos_captured"
